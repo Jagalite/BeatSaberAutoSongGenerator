@@ -47,5 +47,6 @@ song = AudioSegment.from_mp3("song.mp3")
 # with open('Normal.json', 'w') as outfile:
 #     json.dump(songJson, outfile)
 
+song.export("song.ogg", format="ogg")
 song = song.set_channels(1)
 song.export("song.wav", format="wav")
