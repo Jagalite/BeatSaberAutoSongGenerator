@@ -30,37 +30,64 @@ print(times)
 print(" ")
 print(spectrogram)
 
+intensityDifferences = []
+maxIntensity = 0
+avgIntensity = 0
+minIntensity = -1
+
 songLength = 4*len(samples)/sample_rate
-for i in range(0, songLength, 1):
+for i in range(0, songLength-1, 1):
     index = i*len(times)/songLength
-    print(index)
-    freq = []
+    #print(index)
     
-    avg = 0
-    leftMax = spectrogram[0][index]
-    rightMax = spectrogram[len(frequencies)-1][index]
+    intensity = 0;
     
     for j in range(len(frequencies)):
-        avg += spectrogram[j][index]
-        if j < len(frequencies)/2 and spectrogram[j][index] > leftMax:
-            leftMax = spectrogram[j][index]
-            
-        if j >= len(frequencies)/2 and spectrogram[j][index] > rightMax:
-            rightMax = spectrogram[j][index]
+        intensity += abs(spectrogram[j][index]-spectrogram[j][index+1])
+    
+    #print(intensity)
+    if(intensity > maxIntensity):
+        maxIntensity = intensity
+        
+    if(minIntensity -1 or intensity < minIntensity):
+        minIntensity = intensity
+        
+    avgIntensity += intensity
+    
+    intensityDifferences.append(intensity)
 
     
-    avg = avg / len(frequencies)
+    # avg = avg / len(frequencies)
     
-    if leftMax > avg:
-        note = {}
-        note["_time"] = i*0.25
-        note["_lineIndex"] = random.randint(0,1)
-        note["_lineLayer"] = random.randint(0,2)
-        note["_type"] = 0
-        note["_cutDirection"] = 8
-        songJson["_notes"].append(note)
+    # if leftMax > avg:
+    #     note = {}
+    #     note["_time"] = i*0.25
+    #     note["_lineIndex"] = random.randint(0,1)
+    #     note["_lineLayer"] = random.randint(0,2)
+    #     note["_type"] = 0
+    #     note["_cutDirection"] = 8
+    #     songJson["_notes"].append(note)
         
-    if rightMax > avg:
+    # if rightMax > avg:
+    #     note = {}
+    #     note["_time"] = i*0.25
+    #     note["_lineIndex"] = random.randint(2,3)
+    #     note["_lineLayer"] = random.randint(0,2)
+    #     note["_type"] = 1
+    #     note["_cutDirection"] = 8
+    #     songJson["_notes"].append(note)
+  
+avgIntensity = avgIntensity / len(intensityDifferences)
+print(maxIntensity)
+print(avgIntensity)
+print(minIntensity)
+
+for i in range(0, len(intensityDifferences), 1):
+    maxDiff = abs(maxIntensity-intensityDifferences[i])
+    avgDiff = abs(avgIntensity-intensityDifferences[i])
+    minDiff = abs(minIntensity-intensityDifferences[i])
+    
+    if(intensityDifferences[i] > avgIntensity):
         note = {}
         note["_time"] = i*0.25
         note["_lineIndex"] = random.randint(2,3)
@@ -68,6 +95,21 @@ for i in range(0, songLength, 1):
         note["_type"] = 1
         note["_cutDirection"] = 8
         songJson["_notes"].append(note)
+        
+for i in range(0, len(intensityDifferences), 4):
+    maxDiff = abs(maxIntensity-intensityDifferences[i])
+    avgDiff = abs(avgIntensity-intensityDifferences[i])
+    minDiff = abs(minIntensity-intensityDifferences[i])
+    
+    if(intensityDifferences[i] <= avgIntensity*0.65):
+        note = {}
+        note["_time"] = i/4
+        note["_lineIndex"] = random.randint(2,3)
+        note["_lineLayer"] = random.randint(0,2)
+        note["_type"] = 1
+        note["_cutDirection"] = 8
+        songJson["_notes"].append(note)
+
         
 with open('Normal.json', 'w') as outfile:
     json.dump(songJson, outfile)
